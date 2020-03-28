@@ -122,8 +122,8 @@ function setPlayers() {
 	}
 }
 
-function play(cardDOM) {
-	var index = $(cardDOM).attr("data-index");
+function play() {
+	var index = $(this).attr("data-index");
 	var card = me().state.hand[index];
 
 	var fromStaging = state.staging !== null;
