@@ -122,7 +122,12 @@ function setPlayers() {
 
 function play(cardDOM) {
 	var index = $(cardDOM).attr("data-index");
-	var card = me().state.hand.splice(index, 1)[0];
+	var card = me().state.hand[index];
+	if (state.lead !== null && state.lead.value === 11) {
+		if (cantPlay(card, state.lead.suit))
+			return alert("cant play that card");
+	}
+	me().state.hand.splice(index, 1)[0];
 	var text = getText(card);
 	if (state.lead === null) {
 		state.lead = card;
@@ -146,6 +151,20 @@ function play(cardDOM) {
 		}
 		sendState(message);
 	}
+}
+
+function cantPlay(card, suit) {
+	if (card.suit === suit && card.value === 1) {
+		return false;
+	}
+	var hand = me().state.hand;
+	for (var i = 0; i < hand.length; i++) {
+		var handCard = hand[i];
+		if (handCard.suit === suit) {
+			if (card.suit !== suit || handCard.value > card.value) return true;
+		}
+	}
+	return false;
 }
 
 function handlePost(card, winner) {
