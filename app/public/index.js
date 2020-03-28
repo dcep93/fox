@@ -125,7 +125,9 @@ function setPlayers() {
 function play(cardDOM) {
 	var index = $(cardDOM).attr("data-index");
 	var card = me().state.hand[index];
-	if (state.staging !== null) {
+
+	var fromStaging = state.staging !== null;
+	if (fromStaging) {
 		handlePre(card);
 		card = state.staging;
 		state.staging = null;
@@ -134,11 +136,14 @@ function play(cardDOM) {
 			return alert("cant play that card");
 	}
 	me().state.hand.splice(index, 1)[0];
-	var duringMessage = handleDuring(card);
-	if (duringMessage !== null) {
-		state.staging = card;
-		return sendState(duringMessage);
+	if (!fromStaging) {
+		var duringMessage = handleDuring(card);
+		if (duringMessage !== null) {
+			state.staging = card;
+			return sendState(duringMessage);
+		}
 	}
+
 	var text = getText(card);
 	if (state.lead === null) {
 		state.lead = card;
