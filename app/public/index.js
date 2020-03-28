@@ -129,13 +129,16 @@ function play(cardDOM) {
 		handlePre(card);
 		card = state.staging;
 		state.staging = null;
-	}
-	if (state.lead !== null && state.lead.value === 11) {
+	} else if (state.lead !== null && state.lead.value === 11) {
 		if (cantPlay(card, state.lead.suit))
 			return alert("cant play that card");
 	}
 	me().state.hand.splice(index, 1)[0];
-	if (handleDuring(card)) return;
+	var duringMessage = handleDuring(card);
+	if (duringMessage !== null) {
+		state.staging = card;
+		return sendState(duringMessage);
+	}
 	var text = getText(card);
 	if (state.lead === null) {
 		state.lead = card;
@@ -178,6 +181,8 @@ function cantPlay(card, suit) {
 function handlePre(card) {
 	if (state.staging.value === 5) {
 		state.deck.unshift(card);
+	} else if (state.staging.value === 3) {
+		state.trump = card;
 	}
 }
 
@@ -186,11 +191,15 @@ function handleDuring(card) {
 		var hand = me().state.hand;
 		hand.shift(state.deck.shift());
 		sortHand(hand);
-		state.staging = card;
-		sendState("draws a card");
-		return true;
+		return "draws a card";
 	}
-	return false;
+	if (card.value === 3) {
+		var hand = me().state.hand;
+		hand.shift(state.trump);
+		sortHand(hand);
+		return "swaps trump";
+	}
+	return null;
 }
 
 function handlePost(card, winner) {
