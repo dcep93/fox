@@ -137,7 +137,7 @@ function play(cardDOM) {
 			winner = state.players[state.currentPlayer];
 		}
 		winner.state.tricks++;
-		state.lead = null;
+		handlePost(card, winner);
 		var message = `played ${text}`;
 		if (me().state.hand.length === 0) {
 			message = `${message} - new hand`;
@@ -148,10 +148,38 @@ function play(cardDOM) {
 	}
 }
 
+function handlePost(card, winner) {
+	if (card.value === 1) {
+		if (winner !== me()) {
+			advanceTurn();
+		}
+	} else if (state.lead.value === 1) {
+		if (winner === me()) {
+			advanceTurn();
+		}
+	}
+	if (card.value === 7) winner.state.score++;
+	if (state.lead.value === 7) winner.state.score++;
+	state.lead = null;
+}
+
 function wins(card) {
 	if (card.suit === state.lead.suit) {
 		return card.value > state.lead.value;
 	} else {
+		if (card.value === 9) {
+			if (state.lead.value !== 9) {
+				if (state.lead.suit === state.trump.suit) {
+					return card.value > state.lead.value;
+				} else {
+					return true;
+				}
+			}
+		} else if (state.lead.value === 9) {
+			if (card.value < state.lead.value) {
+				return false;
+			}
+		}
 		return card.suit === state.trump.suit;
 	}
 }
