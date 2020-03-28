@@ -159,6 +159,7 @@ function play() {
 		}
 		winner.state.tricks++;
 		handlePost(card, winner);
+		state.lead = null;
 		var message = `played ${text}`;
 		if (me().state.hand.length === 0) {
 			message = `${message} - new hand`;
@@ -194,13 +195,16 @@ function handlePre(card) {
 function handleDuring(card) {
 	if (card.value === 5) {
 		var hand = me().state.hand;
-		hand.shift(state.deck.shift());
+		var drawnCard = state.deck.shift();
+		var text = getText(drawnCard);
+		alert(text);
+		hand.unshift(drawnCard);
 		sortHand(hand);
 		return "draws a card";
 	}
 	if (card.value === 3) {
 		var hand = me().state.hand;
-		hand.shift(state.trump);
+		hand.unshift(state.trump);
 		sortHand(hand);
 		return "swaps trump";
 	}
@@ -219,7 +223,6 @@ function handlePost(card, winner) {
 	}
 	if (card.value === 7) winner.state.score++;
 	if (state.lead.value === 7) winner.state.score++;
-	state.lead = null;
 }
 
 function wins(card) {
@@ -284,7 +287,11 @@ function setTrump() {
 }
 
 function setLead() {
-	if (state.lead === null) return;
-	var text = getText(state.lead);
+	var text;
+	if (state.lead === null) {
+		text = "";
+	} else {
+		text = getText(state.lead);
+	}
 	$("#lead").text(text);
 }
