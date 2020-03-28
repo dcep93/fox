@@ -5,6 +5,7 @@
 // state.deck [Card]
 // state.lead ?Card
 // state.trump Card
+// state.staging ?Card
 
 const NUM_RANKS = 11;
 const TRICKS_PER_ROUND = 13;
@@ -17,6 +18,7 @@ function prepare() {
 	state.currentPlayer = myIndex;
 	state.dealer = -1;
 	state.numSuits = Number.parseInt($("#num_suits").val());
+	state.staging = null;
 	for (var i = 0; i < state.players.length; i++) {
 		state.players[i].state = newState();
 	}
@@ -123,11 +125,17 @@ function setPlayers() {
 function play(cardDOM) {
 	var index = $(cardDOM).attr("data-index");
 	var card = me().state.hand[index];
+	if (state.staging !== null) {
+		handlePre(card);
+		card = state.staging;
+		state.staging = null;
+	}
 	if (state.lead !== null && state.lead.value === 11) {
 		if (cantPlay(card, state.lead.suit))
 			return alert("cant play that card");
 	}
 	me().state.hand.splice(index, 1)[0];
+	if (handleDuring(card)) return;
 	var text = getText(card);
 	if (state.lead === null) {
 		state.lead = card;
@@ -163,6 +171,24 @@ function cantPlay(card, suit) {
 		if (handCard.suit === suit) {
 			if (card.suit !== suit || handCard.value > card.value) return true;
 		}
+	}
+	return false;
+}
+
+function handlePre(card) {
+	if (state.staging.value === 5) {
+		state.deck.unshift(card);
+	}
+}
+
+function handleDuring(card) {
+	if (card.value === 5) {
+		var hand = me().state.hand;
+		hand.shift(state.deck.shift());
+		sortHand(hand);
+		state.staging = card;
+		sendState("draws a card");
+		return true;
 	}
 	return false;
 }
