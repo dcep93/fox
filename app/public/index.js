@@ -27,7 +27,7 @@ function prepare() {
 }
 
 function deal() {
-	state.dealer = (state.dealer + 1) % state.players.length;
+	state.dealer = playerByIndex(state.dealer + 1);
 	state.lead = null;
 	state.deck = buildDeck();
 	for (var i = 0; i < state.players.length; i++) {
@@ -131,9 +131,8 @@ function play() {
 		handlePre(card);
 		card = state.staging;
 		state.staging = null;
-	} else if (state.lead !== null && state.lead.value === 11) {
-		if (cantPlay(card, state.lead.suit))
-			return alert("cant play that card");
+	} else if (state.lead !== null) {
+		if (cantPlay(card)) return alert("cant play that card");
 	}
 	me().state.hand.splice(index, 1)[0];
 	if (!fromStaging) {
@@ -153,8 +152,8 @@ function play() {
 		var winner;
 		if (wins(card)) {
 			winner = me();
-			advanceTurn();
 		} else {
+			advanceTurn();
 			winner = state.players[state.currentPlayer];
 		}
 		winner.state.tricks++;
@@ -170,15 +169,25 @@ function play() {
 	}
 }
 
-function cantPlay(card, suit) {
-	if (card.suit === suit && card.value === 1) {
-		return false;
+function cantPlay(card) {
+	if (card.suit === state.lead.suit) {
+		if (state.lead.value !== 11) {
+			return false;
+		} else if (card.value === 1) {
+			return false;
+		}
 	}
 	var hand = me().state.hand;
 	for (var i = 0; i < hand.length; i++) {
 		var handCard = hand[i];
-		if (handCard.suit === suit) {
-			if (card.suit !== suit || handCard.value > card.value) return true;
+		if (handCard.suit === state.lead.suit) {
+			if (state.lead.value === 11) {
+				if (handCard.value > card.value) {
+					return true;
+				}
+			} else {
+				return true;
+			}
 		}
 	}
 	return false;
@@ -289,7 +298,7 @@ function setTrump() {
 function setLead() {
 	var text;
 	if (state.lead === null) {
-		text = "";
+		text = "-";
 	} else {
 		text = getText(state.lead);
 	}
