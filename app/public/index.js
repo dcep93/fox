@@ -196,7 +196,7 @@ function cantPlay(card) {
 
 function handlePre(card) {
 	if (state.staging.value === 5) {
-		state.deck.unshift(card);
+		state.deck.push(card);
 	} else if (state.staging.value === 3) {
 		state.trump = card;
 	}
