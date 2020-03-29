@@ -1,17 +1,19 @@
 // type Card {suit: int, value: int}
-// players.state {hand: [Card], tricks: int, score: int}
+// players.state {hand: [Card], tricks: int, score: int, cheater: bool}
 // state.dealer int
 // state.numSuits int
 // state.deck [Card]
 // state.lead ?Card
 // state.trump Card
 // state.staging ?Card
+// state.previous string
 
 const NUM_RANKS = 11;
 const TRICKS_PER_ROUND = 13;
 
 $(document).ready(function() {
 	$("#start_over").click(prepare);
+	$("#show_log").click(showLog);
 });
 
 function prepare() {
@@ -21,6 +23,7 @@ function prepare() {
 	for (var i = 0; i < state.players.length; i++) {
 		state.players[i].state = newState();
 	}
+	state.previous = "new game";
 	deal();
 	sendState("prepare");
 }
@@ -77,7 +80,8 @@ function getSortPosition(card) {
 
 function newState() {
 	var playerState = {
-		score: 0
+		score: 0,
+		cheater: false
 	};
 	return playerState;
 }
@@ -111,12 +115,14 @@ function setPlayers() {
 	$("#players_state").empty();
 	for (var i = 0; i < state.players.length; i++) {
 		var player = state.players[i];
+		var name = player.name;
+		if (player.state.cheater) name += " - CHEATER";
 		$("<div>")
 			.attr("data-index", i)
 			.addClass("player_state")
 			.addClass("bubble")
 			.addClass("inline")
-			.append($("<p>").text(player.name))
+			.append($("<p>").text(name))
 			.append($("<p>").text("score: " + player.state.score))
 			.append($("<p>").text("tricks: " + player.state.tricks))
 			.appendTo("#players_state");
@@ -124,6 +130,8 @@ function setPlayers() {
 }
 
 function play() {
+	// in case it was opened earlier
+	$("#log_container").hide();
 	var index = $(this).attr("data-index");
 	var card = me().state.hand[index];
 
@@ -159,6 +167,7 @@ function play() {
 		}
 		winner.state.tricks++;
 		handlePost(card, winner);
+		state.previous = `${getText(state.lead)} vs ${text}`;
 		state.lead = null;
 		var message = `played ${text}`;
 		if (me().state.hand.length === 0) {
@@ -166,6 +175,7 @@ function play() {
 				.map(player => `${player.name}: ${player.state.tricks}`)
 				.join(" / ");
 			message = `${message} - new hand - ${scores}`;
+			state.previous += `\n${scores}`;
 			scoreFromTricks();
 			deal();
 		}
@@ -210,7 +220,7 @@ function handleDuring(card) {
 		var hand = me().state.hand;
 		var drawnCard = state.deck.shift();
 		var text = getText(drawnCard);
-		alert(text);
+		alert(`you drew ${text}`);
 		hand.unshift(drawnCard);
 		sortHand(hand);
 		return "draws a card";
@@ -292,6 +302,7 @@ function update() {
 	setPlayers();
 	setTrump();
 	setLead();
+	setPrevious();
 }
 
 function setTrump() {
@@ -307,4 +318,20 @@ function setLead() {
 		text = getText(state.lead);
 	}
 	$("#lead").text(text);
+}
+
+function setPrevious() {
+	$("#previous").text(state.previous);
+}
+
+function showLog() {
+	if (
+		!confirm(
+			"Are you sure you want to see the log? You'll be branded a cheater if you do."
+		)
+	)
+		return;
+	$("#log_container").show();
+	me().state.cheater = true;
+	sendState("opened the log");
 }
