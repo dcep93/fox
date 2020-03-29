@@ -155,7 +155,7 @@ function play() {
 			winner = me();
 		} else {
 			advanceTurn();
-			winner = state.players[state.currentPlayer];
+			winner = current();
 		}
 		winner.state.tricks++;
 		handlePost(card, winner);
