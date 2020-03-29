@@ -162,8 +162,10 @@ function play() {
 		state.lead = null;
 		var message = `played ${text}`;
 		if (me().state.hand.length === 0) {
-			// todo point totals
-			message = `${message} - new hand`;
+			var scores = state.players
+				.map(player => `${player.name}: ${player.state.tricks}`)
+				.join(" / ");
+			message = `${message} - new hand - ${scores}`;
 			scoreFromTricks();
 			deal();
 		}
