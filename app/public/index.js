@@ -72,7 +72,7 @@ function getText(card) {
 }
 
 function getSortPosition(card) {
-	return card.suit * NUM_RANKS + card.value;
+	return card.suit.codePointAt() * NUM_RANKS + card.value;
 }
 
 function newState() {
