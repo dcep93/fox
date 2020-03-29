@@ -43,7 +43,8 @@ function buildDeck() {
 	var deck = [];
 	for (var i = 0; i < state.numSuits; i++) {
 		for (var j = 1; j <= NUM_RANKS; j++) {
-			deck.push({ suit: i, value: j });
+			var suit = String.fromCharCode(65 + i);
+			deck.push({ suit: suit, value: j });
 		}
 	}
 	shuffleArray(deck);
