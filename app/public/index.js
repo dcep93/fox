@@ -15,8 +15,7 @@ $(document).ready(function() {
 });
 
 function prepare() {
-	state.currentPlayer = myIndex;
-	state.dealer = -1;
+	state.dealer = myIndex;
 	state.numSuits = Number.parseInt($("#num_suits").val());
 	state.staging = null;
 	for (var i = 0; i < state.players.length; i++) {
@@ -27,6 +26,7 @@ function prepare() {
 }
 
 function deal() {
+	state.currentPlayer = state.dealer;
 	state.dealer = playerByIndex(state.dealer + 1);
 	state.lead = null;
 	state.deck = buildDeck();
